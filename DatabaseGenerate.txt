@@ -1,0 +1,94 @@
+ALTER TABLE Player
+ADD CONSTRAINT PlayerAccount UNIQUE (AccountId);
+
+ALTER TABLE Country ADD CONSTRAINT pk_country_id PRIMARY KEY (Id)
+ALTER TABLE Player ADD CONSTRAINT pk_player_id PRIMARY KEY (Id)
+ALTER TABLE Provider ADD CONSTRAINT pk_provider_id PRIMARY KEY (Id)
+ALTER TABLE Theme ADD CONSTRAINT pk_theme_id PRIMARY KEY (Id)
+ALTER TABLE Wager ADD CONSTRAINT pk_wager_id PRIMARY KEY (Id)
+
+ALTER TABLE Wager
+ADD CONSTRAINT fk_PlayerWager FOREIGN KEY (PlayerId)
+REFERENCES Player (Id);
+
+ALTER TABLE Wager
+ADD CONSTRAINT fk_ThemeWager FOREIGN KEY (ThemeId)
+REFERENCES Theme (Id);
+
+ALTER TABLE Wager
+ADD CONSTRAINT fk_ProviderWager FOREIGN KEY (ProviderId)
+REFERENCES Provider (Id);
+
+ALTER TABLE Wager
+ADD CONSTRAINT fk_CountryrWager FOREIGN KEY (CountryId)
+REFERENCES Country (Id);
+
+CREATE PROCEDURE InsertCasinoWager
+	@WagerId UNIQUEIDENTIFIER,
+    @ProviderName NVARCHAR(MAX),
+    @ThemeName NVARCHAR(MAX),
+	@Amount MONEY,
+	@CreatedDateTime DATETIME,
+	@PlayerAccountId UNIQUEIDENTIFIER,
+	@PlayerUsername NVARCHAR(MAX),
+	@CountryCode NVARCHAR(20)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @ProviderId INT;
+    DECLARE @ThemeId INT;
+	DECLARE @PlayerId INT;
+	DECLARE @CountryId INT;
+
+    SELECT @ProviderId = Id
+    FROM Provider
+    WHERE Name = @ProviderName;
+
+    IF @ProviderId IS NULL
+    BEGIN
+        INSERT INTO Provider (Name)
+        VALUES (@ProviderName);
+
+        SET @ProviderId = SCOPE_IDENTITY(); -- Get the newly inserted Id
+    END;
+
+    SELECT @ThemeId = Id
+    FROM Theme
+    WHERE Name = @ThemeName;
+
+    IF @ThemeId IS NULL
+    BEGIN
+        INSERT INTO Theme (Name)
+        VALUES (@ThemeName);
+
+        SET @ThemeId = SCOPE_IDENTITY();
+    END;
+
+	SELECT @PlayerId = Id
+    FROM Player
+    WHERE AccountId = @PlayerAccountId;
+
+	IF @PlayerId IS NULL
+    BEGIN
+        INSERT INTO Player (AccountId, Username)
+        VALUES (@PlayerAccountId, @PlayerUsername);
+
+        SET @PlayerId = SCOPE_IDENTITY();
+    END;
+
+	SELECT @CountryId = Id
+    FROM Country
+    WHERE Code = @CountryCode;
+
+	IF @CountryId IS NULL
+    BEGIN
+        INSERT INTO Country (Code)
+        VALUES (@CountryCode);
+
+        SET @CountryId = SCOPE_IDENTITY();
+    END;
+
+    INSERT INTO Wager (WagerId, ThemeId, ProviderId, Amount, CreatedDateTime, CountryId, PlayerId)
+    VALUES (@WagerId, @ThemeId, @ProviderId, @Amount, @CreatedDateTime, @CountryId, @PlayerId);
+END;

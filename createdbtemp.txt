@@ -1,0 +1,246 @@
+USE [OT_Assessment_DB]
+GO
+/****** Object:  StoredProcedure [dbo].[InsertCasinoWager]    Script Date: 2025/01/04 22:13:05 ******/
+DROP PROCEDURE [dbo].[InsertCasinoWager]
+GO
+ALTER TABLE [dbo].[Wager] DROP CONSTRAINT [fk_ThemeWager]
+GO
+ALTER TABLE [dbo].[Wager] DROP CONSTRAINT [fk_ProviderWager]
+GO
+ALTER TABLE [dbo].[Wager] DROP CONSTRAINT [fk_PlayerWager]
+GO
+ALTER TABLE [dbo].[Wager] DROP CONSTRAINT [fk_CountryrWager]
+GO
+/****** Object:  Table [dbo].[Wager]    Script Date: 2025/01/04 22:13:05 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Wager]') AND type in (N'U'))
+DROP TABLE [dbo].[Wager]
+GO
+/****** Object:  Table [dbo].[Theme]    Script Date: 2025/01/04 22:13:05 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Theme]') AND type in (N'U'))
+DROP TABLE [dbo].[Theme]
+GO
+/****** Object:  Table [dbo].[Provider]    Script Date: 2025/01/04 22:13:05 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Provider]') AND type in (N'U'))
+DROP TABLE [dbo].[Provider]
+GO
+/****** Object:  Table [dbo].[Player]    Script Date: 2025/01/04 22:13:05 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Player]') AND type in (N'U'))
+DROP TABLE [dbo].[Player]
+GO
+/****** Object:  Table [dbo].[Game]    Script Date: 2025/01/04 22:13:05 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Game]') AND type in (N'U'))
+DROP TABLE [dbo].[Game]
+GO
+/****** Object:  Table [dbo].[Country]    Script Date: 2025/01/04 22:13:05 ******/
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Country]') AND type in (N'U'))
+DROP TABLE [dbo].[Country]
+GO
+/****** Object:  Table [dbo].[Country]    Script Date: 2025/01/04 22:13:05 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Country](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Code] [nvarchar](20) NOT NULL,
+ CONSTRAINT [pk_coutry_id] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Game]    Script Date: 2025/01/04 22:13:05 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Game](
+	[Id] [int] PRIMARY KEY IDENTITY(1,1) NOT NULL,
+	[Name] [nvarchar](max) NOT NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Player]    Script Date: 2025/01/04 22:13:05 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Player](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[AccountId] [uniqueidentifier] NOT NULL,
+	[Username] [nvarchar](max) NULL,
+ CONSTRAINT [pk_player_id] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [PlayerAccount] UNIQUE NONCLUSTERED 
+(
+	[AccountId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Provider]    Script Date: 2025/01/04 22:13:05 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Provider](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [nvarchar](max) NOT NULL,
+ CONSTRAINT [pk_provider_id] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Theme]    Script Date: 2025/01/04 22:13:05 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Theme](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [nvarchar](255) NOT NULL,
+ CONSTRAINT [pk_theme_id] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Wager]    Script Date: 2025/01/04 22:13:05 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Wager](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[WagerId] [uniqueidentifier] NOT NULL,
+	[ThemeId] [int] NOT NULL,
+	[ProviderId] [int] NOT NULL,
+	[Amount] [money] NOT NULL,
+	[CreatedDateTime] [datetime] NOT NULL,
+	[CountryId] [int] NOT NULL,
+	[PlayerId] [int] NOT NULL,
+	[GameId] [int] NOT NULL
+ CONSTRAINT [pk_wager_id] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Wager]  WITH CHECK ADD  CONSTRAINT [fk_CountryrWager] FOREIGN KEY([CountryId])
+REFERENCES [dbo].[Country] ([Id])
+GO
+ALTER TABLE [dbo].[Wager] CHECK CONSTRAINT [fk_CountryrWager]
+GO
+ALTER TABLE [dbo].[Wager]  WITH CHECK ADD  CONSTRAINT [fk_PlayerWager] FOREIGN KEY([PlayerId])
+REFERENCES [dbo].[Player] ([Id])
+GO
+ALTER TABLE [dbo].[Wager] CHECK CONSTRAINT [fk_PlayerWager]
+GO
+ALTER TABLE [dbo].[Wager]  WITH CHECK ADD  CONSTRAINT [fk_ProviderWager] FOREIGN KEY([ProviderId])
+REFERENCES [dbo].[Provider] ([Id])
+GO
+ALTER TABLE [dbo].[Wager] CHECK CONSTRAINT [fk_ProviderWager]
+GO
+ALTER TABLE [dbo].[Wager]  WITH CHECK ADD  CONSTRAINT [fk_ThemeWager] FOREIGN KEY([ThemeId])
+REFERENCES [dbo].[Theme] ([Id])
+GO
+ALTER TABLE [dbo].[Wager]  WITH CHECK ADD  CONSTRAINT [fk_GameWager] FOREIGN KEY([GameId])
+REFERENCES [dbo].[Game] ([Id])
+GO
+ALTER TABLE [dbo].[Wager] CHECK CONSTRAINT [fk_ThemeWager]
+GO
+/****** Object:  StoredProcedure [dbo].[InsertCasinoWager]    Script Date: 2025/01/04 22:13:05 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[InsertCasinoWager]
+	@WagerId UNIQUEIDENTIFIER,
+    @ProviderName NVARCHAR(MAX),
+    @ThemeName NVARCHAR(MAX),
+	@Amount MONEY,
+	@CreatedDateTime DATETIME,
+	@PlayerAccountId UNIQUEIDENTIFIER,
+	@PlayerUsername NVARCHAR(MAX),
+	@CountryCode NVARCHAR(20),
+	@GameName NVARCHAR(MAX)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @ProviderId INT;
+    DECLARE @ThemeId INT;
+	DECLARE @PlayerId INT;
+	DECLARE @CountryId INT;
+	DECLARE @GameId INT;
+
+    SELECT @ProviderId = Id
+    FROM Provider
+    WHERE Name = @ProviderName;
+
+    IF @ProviderId IS NULL
+    BEGIN
+        INSERT INTO Provider (Name)
+        VALUES (@ProviderName);
+
+        SET @ProviderId = SCOPE_IDENTITY(); -- Get the newly inserted Id
+    END;
+
+    SELECT @ThemeId = Id
+    FROM Theme
+    WHERE Name = @ThemeName;
+
+    IF @ThemeId IS NULL
+    BEGIN
+        INSERT INTO Theme (Name)
+        VALUES (@ThemeName);
+
+        SET @ThemeId = SCOPE_IDENTITY();
+    END;
+
+	SELECT @PlayerId = Id
+    FROM Player
+    WHERE AccountId = @PlayerAccountId;
+
+	IF @PlayerId IS NULL
+    BEGIN
+        INSERT INTO Player (AccountId, Username)
+        VALUES (@PlayerAccountId, @PlayerUsername);
+
+        SET @PlayerId = SCOPE_IDENTITY();
+    END;
+
+	SELECT @CountryId = Id
+    FROM Country
+    WHERE Code = @CountryCode;
+
+	IF @CountryId IS NULL
+    BEGIN
+        INSERT INTO Country (Code)
+        VALUES (@CountryCode);
+
+        SET @CountryId = SCOPE_IDENTITY();
+    END;
+
+	SELECT @GameId = Id
+    FROM Game
+    WHERE Name = @GameName;
+
+	IF @GameId IS NULL
+    BEGIN
+        INSERT INTO Game (Name)
+        VALUES (@GameName);
+
+        SET @GameId = SCOPE_IDENTITY();
+    END;
+
+    INSERT INTO Wager (WagerId, ThemeId, ProviderId, Amount, CreatedDateTime, CountryId, PlayerId, GameId)
+    VALUES (@WagerId, @ThemeId, @ProviderId, @Amount, @CreatedDateTime, @CountryId, @PlayerId, @GameId);
+END;
+GO
+
+
+USE master;
+ALTER DATABASE OT_Assessment_DB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+DROP DATABASE OT_Assessment_DB ;
