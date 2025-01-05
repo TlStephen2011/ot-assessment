@@ -15,7 +15,6 @@ public class CasinoWagerRepository(IConfiguration configuration) : ICasinoWagerR
     public async Task CreateCasinoWager(CasinoWager wager)
     {
         await using var connection = new SqlConnection(_connectionString);
-        connection.Open();
 
         await connection.ExecuteAsync(
             "InsertCasinoWager",
@@ -103,33 +102,28 @@ public class CasinoWagerRepository(IConfiguration configuration) : ICasinoWagerR
     public async Task<IEnumerable<TopSpendersResponseDto>> GetTopSpenders(int count)
     {
         var query = @"
-            SELECT Wager.Id, Wager.Amount, Player.Id, Player.AccountId, Player.Username 
-            FROM Wager
-            JOIN Player ON Wager.PlayerId = Player.Id
-            ORDER BY Wager.Amount DESC
+            SELECT 
+                Player.AccountId AS AccountId,
+                Player.Username AS Username,
+                SUM(Wager.Amount) AS TotalAmountSpent
+            FROM 
+                Wager
+            JOIN 
+                Player ON Wager.PlayerId = Player.Id
+            GROUP BY 
+                Player.AccountId, Player.Username
+            ORDER BY 
+                TotalAmountSpent DESC
             OFFSET 0 ROWS
             FETCH NEXT @Count ROWS ONLY
         ";
 
         await using var connection = new SqlConnection(_connectionString);
 
-        var topSpendersResponse = new List<TopSpendersResponseDto>();
-
-        await connection.QueryAsync<Wager, Player, Wager>(query, (wager, player) =>
-        {
-            topSpendersResponse.Add(new TopSpendersResponseDto
-            {
-                AccountId = player.AccountId,
-                Username = player.Username,
-                TotalAmountSpent = wager.Amount
-            });
-
-            return wager;
-        },
-        new
-        {
-            Count = count
-        });
+        var topSpendersResponse = await connection.QueryAsync<TopSpendersResponseDto>(
+            query,
+            new { Count = count }
+        );
 
         return topSpendersResponse;
     }
